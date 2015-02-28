@@ -1,0 +1,161 @@
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+        <script type="text/javascript" src="build/grpx.min.js"></script>
+    </head>
+<body>
+
+
+<h2>PART-1. Already selected options</h2>
+
+<h2>Presets</h2>
+<ul>
+    <li>production year: 2011</li>
+    <li>agemonths: 43</li><br/>
+    <li>make: Renault</li>
+    <li>model: Symbol</li>
+    <i>(mid=1247)</i><br /><br />
+    <li>modify: 1598 (102) БИ Передний МТ</li>
+    <!-- <i>(cmid=4183)</i> -->
+</ul>
+
+
+<h2>A while getting a complectation</h2>
+<p>When you ask complectation Api-service
+<br>(for exmp: http://api.correctprice.ru/get_compl?mid=1247&year=2011&maid=JsEb6B0uMrYU4zkkbq8KOmCjOnTJ_ps0&version=1415600009)
+<br>you get some data and GRPX, to deploy it into full detalisation params
+<br>(incoming grpx: "grp0":"0","grp1":"7FF7FFE0C8000000","grp2":"7FC503FFBFFFFFFF","grp3":"C3CFF3FCCC3C3FFC","grp4":"0","grp5":"0","grp6":"0","grp7":"0")
+</p>
+
+
+
+
+
+
+
+
+<hr>
+<h2>PART-2. GRPX unpack</h2>
+<p>After unpack you get key/value options. If you want to change text of Key/Value (for your App), (for ex. yes/no to Да/Нет) — save the origin text somewhere. Because when you will pack selected options you should send to pack-lib the origin text of key/value</p>
+<ul>
+    <li>GRP0: 0</li>
+    <li>GRP1: 7FF7FFE0C8000000</li>
+    <li>GRP2: 7FC503FFBFFFFFFF</li>
+    <li>GRP3: C3CFF3FCCC3C3FFC</li>
+    <li>GRP4: 0</li>
+    <li>GRP5: 0</li>
+    <li>GRP6: 0</li>
+    <li>GRP7: 0</li>
+</ul>
+<button id="grpxUnpack">Unpack</button>
+<p><i>look at dev tool console.log </i></p>
+<script>
+    $(function(){
+        window.grpxlib = new GRPX;
+
+        $('#grpxUnpack').on('click', function(){
+            allOptions = grpxlib.unpack({
+                 grp0: '0'
+                ,grp1: '7FF7FFE0C8000000'
+                ,grp2: '7FC503FFBFFFFFFF'
+                ,grp3: 'C3CFF3FCCC3C3FFC'
+                ,grp4: '0'
+                ,grp5: '0'
+                ,grp6: '0'
+                ,grp7: '0'
+            });
+
+             console.log('UNPACK', '\n', allOptions);
+
+            return false;
+        });
+    })
+</script>
+
+
+
+<hr>
+<h2>PART-3. GRPX pack</h2>
+<p>We need to pack some params (different format) into GRPX. For example:</p>
+
+<ul>
+    <li>condition: excellent</li>
+    <li>Лобовое стекло с подогревом: Да</li>
+    <li>sbook: yes</li>
+    <li>ckeys: 2</li>
+</ul>
+    <button id="grpxPack">Pack</button>
+    <button id="grpxPackDefault">Pack with default</button>
+    <p><i>look at dev tool console.log </i></p>
+
+    <script>
+        $(function(){
+            var grpxlib = window.grpxlib;
+            // packing params
+            var packData = {
+                 'condition': 'excellent'
+                ,'Лобовое стекло с подогревом': 'Да'
+                ,'sbook': 'yes'
+                ,'ckeys': '1'
+            };
+
+            $('#grpxPack').on('click', function(){
+                var allGRPX = grpxlib.pack(packData);
+                console.log('PACK', '\n', packData, '\n', allGRPX);
+
+                // unpacking already packs params
+                var unPackData = {
+                     grp0: allGRPX.obj.grp0
+                    ,grp1: allGRPX.obj.grp1
+                    ,grp2: allGRPX.obj.grp2
+                    ,grp3: allGRPX.obj.grp3
+                    ,grp4: allGRPX.obj.grp4
+                    ,grp5: allGRPX.obj.grp5
+                    ,grp6: allGRPX.obj.grp6
+                    ,grp7: allGRPX.obj.grp7
+                }
+                var allOptions = grpxlib.unpack(unPackData);
+                console.log('UNPACK', '\n', unPackData, '\n', allOptions);
+
+                return false;
+            });
+
+            $('#grpxPackDefault').on('click', function(){
+                var defaultGRPX = {
+                    "grp0":"0",
+                    "grp1":"FFE8000000000000",
+                    "grp2":"1FFDFFFFFFFFFC29",
+                    "grp3":"FFFF333C03FD1C7F",
+                    "grp4":"F33F3",
+                    "grp5":"0",
+                    "grp6":"0",
+                    "grp7":"0"
+                };
+
+                var allGRPX = grpxlib.packWithDefault(packData, defaultGRPX);
+                console.log('PACK', '\n', packData, '\n', allGRPX);
+
+                // unpacking already packs params
+                var unPackData = {
+                     grp0: allGRPX.obj.grp0
+                    ,grp1: allGRPX.obj.grp1
+                    ,grp2: allGRPX.obj.grp2
+                    ,grp3: allGRPX.obj.grp3
+                    ,grp4: allGRPX.obj.grp4
+                    ,grp5: allGRPX.obj.grp5
+                    ,grp6: allGRPX.obj.grp6
+                    ,grp7: allGRPX.obj.grp7
+                }
+                var allOptions = grpxlib.unpack(unPackData);
+                console.log('UNPACK', '\n', unPackData, '\n', allOptions);
+            });
+        })
+    </script>
+</ul>
+
+
+
+
+</body></html>
+
