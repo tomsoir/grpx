@@ -37,7 +37,17 @@ h2 a,
 h3 a { font-weight: bold; color:#393939;}
 h1 a:hover,
 h2 a:hover,
-h3 a:hover { text-decoration: underline;}
+h3 a:hover { text-decoration: none; position: relative; }
+h1 a:hover:before,
+h2 a:hover:before,
+h3 a:hover:before {
+  position: absolute;
+  display: block;
+  content: '# '; 
+  color: #777;
+  right: 100%;
+  margin-right: 5px;
+}
 
 a {
   color:#39c;
@@ -262,3 +272,23 @@ footer {
   }
 }
 sub{ font-size:10px; }
+
+div.desc{  
+  position: relative;
+  margin: -10px 0 0 20px;
+}
+
+table.example { margin-top: 10px; }
+table.example tr{ border: 0; }
+table.example td{ width: 50%; border: 0; vertical-align: top; position: relative; padding:10px 0 0 0;} 
+/*table.example td:first-of-type{ border-right: 1px solid #E5E5E5;}*/
+table.example td p { margin-bottom: 5px; }
+table.example td textarea { width: 100%; }
+.output{ overflow: auto; position: absolute;right: 0;left: 0;bottom: 0;top: 0;}
+.example { margin-left: 20px; }
+.example i { float: right; color: #ff0000; padding-left: 10px; }
+form{ display: block; padding-bottom: 20px; }
+.output{ font-size: 11px; }
+
+
+

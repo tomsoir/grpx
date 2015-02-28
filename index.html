@@ -34,7 +34,7 @@
                 <h1><a class="anchor" aria-hidden="true" 
                     id="main" 
                     href="#main">
-                    API и примеры использования
+                    Спецификация и подключение
                 </a></h1>
                 <p>GRPX lib - JavaScript-библиотека, разработанная для сопровождения GRPX бинарных векторов, используемых в компании <a href="http://correctprice.ru">Correct Price "Правильная цена"</a>, и позволяющих преобразовывать и передавать данные в компактном виде.</p>
 
@@ -105,61 +105,330 @@
 
 
 
-            <!-- <div>
+
+
+            <script>
+                $(function(){
+                    window.grpxlib = new GRPX;
+                });
+
+
+                visualizeCode = function(obj, type){
+                    // console.log('>>>', obj);
+                    resultHTML = '<i>Ошибка введенных данных</i>'
+
+                    if(obj){
+                        switch (type) {
+                            case 'unpack': 
+                                var groupHTML = '';
+                                for(groupName in obj){
+                                    var itemHTML = '';
+                                    groupHTML += '<li>'+groupName+'<ul>';
+                                    for(itemName in obj[groupName]){
+                                        itemHTML += '<li><b>'+itemName+'</b>: <span>'+obj[groupName][itemName]+'</span></li>';
+                                    }
+                                    groupHTML += itemHTML+'</ul></li>'
+                                }
+                                resultHTML = '<ul class="dataTree">'+groupHTML+'</ul>';
+                                break
+
+                            case 'pack':
+                                var groupHTML = '';
+                                for(groupName in obj.obj){
+                                    groupHTML += '<li>'+groupName+': '+obj.obj[groupName]+'</li>';
+                                }
+                                resultHTML = '<ul class="dataTree">'+groupHTML+'</ul>';
+                                break
+
+                            case 'unpackDefault':
+                                var groupHTML = '';
+                                for(groupName in obj){
+                                    groupHTML += '<li>'+groupName+': '+obj[groupName]+'</li>';
+                                }
+                                resultHTML = '<ul class="dataTree">'+groupHTML+'</ul>';
+                                break
+                        }
+                    }
+
+                    return resultHTML
+                }
+            </script>
+
+
+
+
+
+
+
+            <div>
                 <h1><a class="anchor" aria-hidden="true" 
                     id="methods" 
                     href="#methods">
-                    Основные методы
+                    Основные методы с примерами
                 </a></h1>
 
+
+
+
+
+                <!-- pack -->
+                <h3><a class="anchor" aria-hidden="true" 
+                    id="pack-method" 
+                    href="#pack-method">
+                    pack
+                </a></h3>
+                <div class="desc">
+                    <div><b>Описание:</b> Запаковка данных в GRPX вектор</div>
+                    <div><b>На вход: 1 параметр</b> 
+                        <ul>
+                            <li>js-объект с данными</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <form id="pack-form">
+                    <table class="example">
+                        <tr><th>Входные данные</th><th>Результат</th></tr>
+                        <tr><td>
+<textarea rows="10">{
+    "condition": "excellent",
+    "Лобовое стекло с подогревом": "Да",
+    "sbook": "yes",
+    "ckeys": "1"
+}</textarea>
+                        </td><td><div class="output"></div></td></tr>
+                        <tr><td colspan="2"><input value="Запакова данные в вектор" type="submit"/></td></tr>
+                    </table>
+                    <script>
+                        $(function(){
+                            $('#pack-form').on('submit', function(){
+                                var $textarea   = $(this).find('textarea');
+                                var $resultwrap = $(this).find('.output');
+                                var $submit     = $(this).find('[type=submit]');
+
+                                var inputData   = ''
+                                try{ inputData  = jQuery.parseJSON( $textarea.val() ) }catch(e){ console.log(e) }
+                                var outputData  = grpxlib.pack(inputData)
+
+                                // show result
+                                $resultwrap.html( visualizeCode(outputData, 'pack') );
+                                // show in console.log
+                                console.log('PACK', '\n in:', inputData,'\n out:', outputData );
+                                // show note
+                                if(!$submit.next().length){ $submit.after('<i>результат доступен в <b>console.log</b></i>') }
+                                return false;
+                            });
+                        });
+                    </script>
+                </form>
+                <!-- /pack -->
+
+
+
+
+
+                <!-- unpack -->
                 <h3><a class="anchor" aria-hidden="true" 
                     id="unpack-method" 
                     href="#unpack-method">
                     unpack
                 </a></h3>
+                <div class="desc">
+                    <div><b>Описание:</b> Распаковка GRPX вектора со всеми переданными значениями</div>
+                    <div><u>Внимание!</u> Первое значение в массива является значением по-умолчанию для данной опции</div>
 
-            </div>
- -->
+                    <div><b>На вход: 1 параметр</b> 
+                        <ul>
+                            <li>js-объект с набором GRPX-векторов</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <form id="unpack-form">
+                    <table class="example">
+                        <tr><th>Входные данные</th><th>Результат</th></tr>
+                        <tr><td>
+<textarea rows="10">{
+    "grp0":"0",
+    "grp1":"FFE8000000000000",
+    "grp2":"1FFDFFFFFFFFFC29",
+    "grp3":"FFFF333C03FD1C7F",
+    "grp4":"F33F3",
+    "grp5":"0",
+    "grp6":"0",
+    "grp7":"0"
+}</textarea>
+                        </td><td><div class="output"></div></td></tr>
+                        <tr><td colspan="2"><input value="Распакова вектор" type="submit"/></td></tr>
+                    </table>
+                    <script>
+                        $(function(){
+                            $('#unpack-form').on('submit', function(){
+                                var $textarea   = $(this).find('textarea');
+                                var $resultwrap = $(this).find('.output');
+                                var $submit     = $(this).find('[type=submit]');
+
+                                var inputData   = ''
+                                try{ inputData  = jQuery.parseJSON( $textarea.val() ) }catch(e){ console.log(e) }
+                                var outputData  = grpxlib.unpack(inputData)
+
+                                // show result
+                                $resultwrap.html( visualizeCode(outputData, 'unpack') );
+                                // show in console.log
+                                console.log('UNPACK', '\n in:', inputData,'\n out:', outputData );
+                                // show note
+                                if(!$submit.next().length){ $submit.after('<i>результат доступен в <b>console.log</b></i>') }
+                                return false;
+                            });
+                        });
+                    </script>
+                </form>
+                <!-- /unpack -->
 
 
 
 
-        <!--
 
-        <p>This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here using GitHub Flavored Markdown, select a template crafted by a designer, and publish. After your page is generated, you can check out the new branch:</p>
 
-        <pre><code>$ cd your_repo_root/repo_name
-        $ git fetch origin
-        $ git checkout gh-pages
-        </code></pre>
 
-        <p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
 
-        <h3>
-        <a id="designer-templates" class="anchor" href="#designer-templates" aria-hidden="true"><span class="octicon octicon-link"></span></a>Designer Templates</h3>
+                <!-- unpackToDefault -->
+                <h3><a class="anchor" aria-hidden="true" 
+                    id="unpackToDefault-method" 
+                    href="#unpackToDefault-method">
+                    unpackToDefault
+                </a></h3>
+                <div class="desc">
+                    <div><b>Описание:</b> Распаковка GRPX вектора имеющиго опции с массивом значений, и автоматическим выбором значений по-умолчанию для каждой опции</div>
+                    <div><b>На вход: 1 параметр</b> 
+                        <ul>
+                            <li>js-объект с набором GRPX-векторов</li>
+                        </ul>
+                    </div>
+                </div>
 
-        <p>We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
+                <form id="unpackToDefault-form">
+                    <table class="example">
+                        <tr><th>Входные данные</th><th>Результат</th></tr>
+                        <tr><td>
+<textarea rows="10">{
+    "grp0":"0",
+    "grp1":"FFE8000000000000",
+    "grp2":"1FFDFFFFFFFFFC29",
+    "grp3":"FFFF333C03FD1C7F",
+    "grp4":"F33F3",
+    "grp5":"0",
+    "grp6":"0",
+    "grp7":"0"
+}</textarea>
+                        </td><td><div class="output"></div></td></tr>
+                        <tr><td colspan="2"><input value="Распакова вектор" type="submit"/></td></tr>
+                    </table>
+                    <script>
+                        $(function(){
+                            $('#unpackToDefault-form').on('submit', function(){
+                                var $textarea   = $(this).find('textarea');
+                                var $resultwrap = $(this).find('.output');
+                                var $submit     = $(this).find('[type=submit]');
 
-        <h3>
-        <a id="rather-drive-stick" class="anchor" href="#rather-drive-stick" aria-hidden="true"><span class="octicon octicon-link"></span></a>Rather Drive Stick?</h3>
+                                var inputData   = ''
+                                try{ inputData  = jQuery.parseJSON( $textarea.val() ) }catch(e){ console.log(e) }
+                                var outputData  = grpxlib.unpackToDefault(inputData)
 
-        <p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
+                                // show result
+                                $resultwrap.html( visualizeCode(outputData, 'unpackDefault') );
+                                // show in console.log
+                                console.log('UNPACK DEFAULT', '\n in:', inputData,'\n out:', outputData );
+                                // show note
+                                if(!$submit.next().length){ $submit.after('<i>результат доступен в <b>console.log</b></i>') }
+                                return false;
+                            });
+                        });
+                    </script>
+                </form>
+                <!-- /unpackToDefault -->
 
-        <h3>
-        <a id="authors-and-contributors" class="anchor" href="#authors-and-contributors" aria-hidden="true"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
 
-        <p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
 
-        <h3>
-        <a id="support-or-contact" class="anchor" href="#support-or-contact" aria-hidden="true"><span class="octicon octicon-link"></span></a>Support or Contact</h3>
 
-        <p>Having trouble with Pages? Check out the documentation at <a href="https://help.github.com/pages">https://help.github.com/pages</a> or contact <a href="mailto:support@github.com">support@github.com</a> and we’ll help you sort it out.</p>
-        -->
+
+
+
+
+
+                <!-- packWithDefault -->
+                <h3><a class="anchor" aria-hidden="true" 
+                    id="packWithDefault-method" 
+                    href="#packWithDefault-method">
+                    packWithDefault
+                </a></h3>
+                <div class="desc">
+                    <div><b>Описание:</b> Распаковка GRPX вектора имеющиго опции с массивом значений, и автоматическим выбором значений по-умолчанию для каждой опции</div>
+                    <div><b>На вход: 2 параметра</b> 
+                        <ul>
+                            <li>js-объект с опциями и значениями которые нужно заменить в значениях выбранных по умолчанию</li>
+                            <li>js-объект с набором GRPX-векторов</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <form id="packWithDefault-form">
+                    <table class="example">
+                        <tr><th>Входные данные</th><th>Результат</th></tr>
+                        <tr><td>
+<textarea rows="6">{
+    "condition": "excellent",
+    "Лобовое стекло с подогревом": "Да",
+    "sbook": "yes",
+    "ckeys": "1"
+}</textarea>
+
+<textarea rows="10">{
+    "grp0":"0",
+    "grp1":"FFE8000000000000",
+    "grp2":"1FFDFFFFFFFFFC29",
+    "grp3":"FFFF333C03FD1C7F",
+    "grp4":"F33F3",
+    "grp5":"0",
+    "grp6":"0",
+    "grp7":"0"
+}</textarea>
+                        </td><td><div class="output"></div></td></tr>
+                        <tr><td colspan="2"><input value="Распакова вектор" type="submit"/></td></tr>
+                    </table>
+                    <script>
+                        $(function(){
+                            $('#packWithDefault-form').on('submit', function(){
+                                var $textarea1  = $($(this).find('textarea')[0]);
+                                var $textarea2  = $($(this).find('textarea')[1]);
+                                var $resultwrap = $(this).find('.output');
+                                var $submit     = $(this).find('[type=submit]');
+
+                                var inputData1  = ''
+                                var inputData2  = ''
+                                try{ inputData1 = jQuery.parseJSON( $textarea1.val() ) }catch(e){ console.log(e) }
+                                try{ inputData2 = jQuery.parseJSON( $textarea2.val() ) }catch(e){ console.log(e) }
+                                var outputData  = grpxlib.packWithDefault(inputData1, inputData2)
+
+                                // show result
+                                $resultwrap.html( visualizeCode(outputData, 'pack') );
+                                // show in console.log
+                                console.log('PACK WITH DEFAULT', '\n in:', inputData1, '\n in:', inputData2, '\n out:', outputData, '\n unpack default:',  grpxlib.unpackToDefault(inputData2), '\n unpack result:', grpxlib.unpack(outputData.obj) );
+                                // show note
+                                if(!$submit.next().length){ $submit.after('<i>результат доступен в <b>console.log</b></i>') }
+                                return false;
+                            });
+                        });
+                    </script>
+                </form>
+                <!-- /packWithDefault -->
+
+
       </section>
       <footer>
         <p><a href="http://correctprice.ru/"><img src="images/correctprice_logo_dev.jpg" alt="correctprice logo" /></a></p>
-        <p><small><a href="http://correctprice.ru/">Correct price</a>. Ваш собственный online-отдел профессиональной аналитики</small></p>
-        <p><small>Репозиторий проекта представлен разработчиком компании Correct Price, <a href="https://github.com/tomsoir">Artem Tkachenko</a></small></p>
+        <p><small><a href="http://correctprice.ru/">Correct price</a>. Ваш собственный online-отдел профессиональной аналитики. &copy; 2015 г.</small></p>
+        <!-- <p><small>Репозиторий проекта представлен разработчиком компании Correct Price, <a href="https://github.com/tomsoir">Artem Tkachenko</a>. &copy; 2015 г.</small></p> -->
       </footer>
     </div>
     <script src="javascripts/scale.fix.js"></script>
