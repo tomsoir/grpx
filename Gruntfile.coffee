@@ -10,6 +10,8 @@ module.exports = (grunt) ->
             company     : 'Correct Price (http://correctprice.ru/)'
             version     : '0.1.1'
             date        : '<%= grunt.template.today("yyyy-mm-dd") %>'
+            page        : 'http://tomsoir.github.io/grpx'
+            wiki        : 'https://github.com/tomsoir/grpx/wiki'
         uglify: 
             options: 
                 compress: 
