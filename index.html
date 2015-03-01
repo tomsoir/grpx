@@ -7,43 +7,14 @@
 <body>
 
 
-<h2>PART-1. Already selected options</h2>
-
-<h2>Presets</h2>
-<ul>
-    <li>production year: 2011</li>
-    <li>agemonths: 43</li><br/>
-    <li>make: Renault</li>
-    <li>model: Symbol</li>
-    <i>(mid=1247)</i><br /><br />
-    <li>modify: 1598 (102) БИ Передний МТ</li>
-    <!-- <i>(cmid=4183)</i> -->
-</ul>
-
-
-<h2>A while getting a complectation</h2>
-<p>When you ask complectation Api-service
-<br>(for exmp: http://api.correctprice.ru/get_compl?mid=1247&year=2011&maid=JsEb6B0uMrYU4zkkbq8KOmCjOnTJ_ps0&version=1415600009)
-<br>you get some data and GRPX, to deploy it into full detalisation params
-<br>(incoming grpx: "grp0":"0","grp1":"7FF7FFE0C8000000","grp2":"7FC503FFBFFFFFFF","grp3":"C3CFF3FCCC3C3FFC","grp4":"0","grp5":"0","grp6":"0","grp7":"0")
-</p>
-
-
-
-
-
-
-
-
-<hr>
-<h2>PART-2. GRPX unpack</h2>
+<h2>GRPX unpack</h2>
 <p>After unpack you get key/value options. If you want to change text of Key/Value (for your App), (for ex. yes/no to Да/Нет) — save the origin text somewhere. Because when you will pack selected options you should send to pack-lib the origin text of key/value</p>
 <ul>
     <li>GRP0: 0</li>
-    <li>GRP1: 7FF7FFE0C8000000</li>
-    <li>GRP2: 7FC503FFBFFFFFFF</li>
-    <li>GRP3: C3CFF3FCCC3C3FFC</li>
-    <li>GRP4: 0</li>
+    <li>GRP1: FFE8000000000000</li>
+    <li>GRP2: 1FFDFFFFFFFFFC29</li>
+    <li>GRP3: FFFF333C03FD1C7F</li>
+    <li>GRP4: F33F3</li>
     <li>GRP5: 0</li>
     <li>GRP6: 0</li>
     <li>GRP7: 0</li>
@@ -57,10 +28,10 @@
         $('#grpxUnpack').on('click', function(){
             allOptions = grpxlib.unpack({
                  grp0: '0'
-                ,grp1: '7FF7FFE0C8000000'
-                ,grp2: '7FC503FFBFFFFFFF'
-                ,grp3: 'C3CFF3FCCC3C3FFC'
-                ,grp4: '0'
+                ,grp1: 'FFE8000000000000'
+                ,grp2: '1FFDFFFFFFFFFC29'
+                ,grp3: 'FFFF333C03FD1C7F'
+                ,grp4: 'F33F3'
                 ,grp5: '0'
                 ,grp6: '0'
                 ,grp7: '0'
@@ -76,7 +47,7 @@
 
 
 <hr>
-<h2>PART-3. GRPX pack</h2>
+<h2>GRPX pack</h2>
 <p>We need to pack some params (different format) into GRPX. For example:</p>
 
 <ul>
