@@ -10,6 +10,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
         <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
         <script type="text/javascript" src="javascripts/grpx.min.js"></script>
+        <!--<script type="text/javascript" src="javascripts/dev/grpx.js"></script>-->
         <!--[if lt IE 9]>
         <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
         <![endif]-->
@@ -51,7 +52,11 @@
                         <br >Допускается использование GRPX lib библиотек как в качестве импортирования в глобальную область видимости переменных так и в качестве AMD-модуля, возвращаемого объект класса.
                     </li>
                     <li>
-                        <b>JQuery — не ниже версии 1.9.0.</b> 
+                        <b>http — протокол</b>
+                        <br>https по отдельному запросу
+                    </li>
+                    <li>
+                        <b>JQuery — не ниже версии 1.9.0.</b>
                         <br>GRPX lib библиотека должна быть проинициализирована непосредственно после инициализации JQuery
                         <br>Используемые JQuery-компоненты в GRPX lib библиотеке:
                         <ol>
@@ -82,7 +87,7 @@
                     <li>После подключения файла для:
                         <ol>
                             <li>Глобальной области видимости будет доступен класс
-<pre><code>window.GRPX</code></pre>
+<pre><code>window.$GRPX</code></pre>
                             </li>
                             <li>Использования в качестве AMD-модуля так же будет доступен класс с указанным при вызове модуля названием</li>
                         </ol>
@@ -90,10 +95,17 @@
                     <li>
                         Инициализация библиотеки произойдет сразу после создания экземпляра класса:
 <pre><code>&lt;script>
-    &lt;!-- инициализация jquery -->
+    // инициализация jquery
     $(function(){
-        &lt;!-- инициализация GRPX lib библиотеки -->
-        window.grpxlib = new GRPX;
+        // инициализация GRPX lib библиотеки
+        window.grpxlib = new $GRPX;
+
+        // пример вызова методов
+        grpxlib.pack({
+            "condition": "excellent",
+        }).done(function(result){
+            console.log('pack >>', result);
+        });
     })
 &lt;/script>
 </code></pre>
@@ -109,9 +121,48 @@
 
             <script>
                 $(function(){
-                    window.grpxlib = new GRPX;
-                });
+                    window.grpxlib = new $GRPX;
 
+                    // fast example 1
+                    grpxlib.pack({
+                        "condition": "excellent",
+                        "Лобовое стекло с подогревом": "Да",
+                        "sbook": "yes",
+                        "ckeys": "1"
+                    }).done(function(result){
+                        console.log('pack >>', result);
+                    });
+
+                    // fast example 2
+                    grpxlib.pack({
+                        "condition": "excellent",
+                    }).done(function(result){
+                        console.log('pack >>', result);
+                    });
+
+                    // fast example 3
+
+                    grpxlib.getFullDetales({
+                        "year":"2009",
+                        "mid":"1821",
+                        "cmid":"6198",
+                        "agemonths":"67",
+                        "grp0":"100000000000000",
+                        "grp1":"200000008000000",
+                        "grp2":"4200008004008001",
+                        "grp3":"20004111000041",
+                        "grp4":"0",
+                        "grp5":"0",
+                        "grp6":"0",
+                        "grp7":"0",
+                        "mileage":"73000",
+                        "maid":"AvOnTlSd4bxmS_mfIvJpuVqJhmn0YtBe",
+                        "version":"1420333135"
+                    }).done(function(result){
+                        console.log('getFullDetales >>', result);
+                    });
+
+                });
 
                 visualizeCode = function(obj, type){
                     // console.log('>>>', obj);
@@ -147,6 +198,8 @@
                                 }
                                 resultHTML = '<ul class="dataTree">'+groupHTML+'</ul>';
                                 break
+
+                            case 'fullDetales':
                         }
                     }
 
@@ -184,6 +237,7 @@
                             <li>js-объект с данными</li>
                         </ul>
                     </div>
+                    <div><b>Ответ: $.Deferred - объект</b> 
                 </div>
 
                 <form id="pack-form">
@@ -208,14 +262,16 @@
 
                                 var inputData   = ''
                                 try{ inputData  = jQuery.parseJSON( $textarea.val() ) }catch(e){ console.log(e) }
-                                var outputData  = grpxlib.pack(inputData)
 
-                                // show result
-                                $resultwrap.html( visualizeCode(outputData, 'pack') );
-                                // show in console.log
-                                console.log('PACK', '\n in:', inputData,'\n out:', outputData );
-                                // show note
-                                if(!$submit.next().length){ $submit.after('<i>результат доступен в <b>console.log</b></i>') }
+                                grpxlib.pack(inputData).done(function(result){
+                                    // show result
+                                    $resultwrap.html( visualizeCode(result, 'pack') );
+                                    // show in console.log
+                                    console.log('PACK', '\n in:', inputData,'\n out:', result );
+                                    // show note
+                                    if(!$submit.next().length){ $submit.after('<i>результат доступен в <b>console.log</b></i>') }
+                                });
+
                                 return false;
                             });
                         });
@@ -242,6 +298,7 @@
                             <li>js-объект с набором GRPX-векторов</li>
                         </ul>
                     </div>
+                    <div><b>Ответ: $.Deferred объект</b> 
                 </div>
 
                 <form id="unpack-form">
@@ -270,14 +327,17 @@
 
                                 var inputData   = ''
                                 try{ inputData  = jQuery.parseJSON( $textarea.val() ) }catch(e){ console.log(e) }
-                                var outputData  = grpxlib.unpack(inputData)
 
-                                // show result
-                                $resultwrap.html( visualizeCode(outputData, 'unpack') );
-                                // show in console.log
-                                console.log('UNPACK', '\n in:', inputData,'\n out:', outputData );
-                                // show note
-                                if(!$submit.next().length){ $submit.after('<i>результат доступен в <b>console.log</b></i>') }
+
+                                grpxlib.unpack(inputData).done(function(result){
+                                    // show result
+                                    $resultwrap.html( visualizeCode(result, 'unpack') );
+                                    // show in console.log
+                                    console.log('UNPACK', '\n in:', inputData,'\n out:', result );
+                                    // show note
+                                    if(!$submit.next().length){ $submit.after('<i>результат доступен в <b>console.log</b></i>') }
+                                });
+
                                 return false;
                             });
                         });
@@ -305,6 +365,7 @@
                             <li>js-объект с набором GRPX-векторов</li>
                         </ul>
                     </div>
+                    <div><b>Ответ: $.Deferred объект</b> 
                 </div>
 
                 <form id="unpackToDefault-form">
@@ -333,14 +394,16 @@
 
                                 var inputData   = ''
                                 try{ inputData  = jQuery.parseJSON( $textarea.val() ) }catch(e){ console.log(e) }
-                                var outputData  = grpxlib.unpackToDefault(inputData)
 
-                                // show result
-                                $resultwrap.html( visualizeCode(outputData, 'unpackDefault') );
-                                // show in console.log
-                                console.log('UNPACK DEFAULT', '\n in:', inputData,'\n out:', outputData );
-                                // show note
-                                if(!$submit.next().length){ $submit.after('<i>результат доступен в <b>console.log</b></i>') }
+                                grpxlib.unpackToDefault(inputData).done(function(result){
+                                    // show result
+                                    $resultwrap.html( visualizeCode(result, 'unpackDefault') );
+                                    // show in console.log
+                                    console.log('UNPACK DEFAULT', '\n in:', inputData,'\n out:', result );
+                                    // show note
+                                    if(!$submit.next().length){ $submit.after('<i>результат доступен в <b>console.log</b></i>') }
+                                });
+
                                 return false;
                             });
                         });
@@ -370,6 +433,7 @@
                             <li>js-объект с набором GRPX-векторов</li>
                         </ul>
                     </div>
+                    <div><b>Ответ: $.Deferred объект</b> 
                 </div>
 
                 <form id="packWithDefault-form">
@@ -408,20 +472,115 @@
                                 var inputData2  = ''
                                 try{ inputData1 = jQuery.parseJSON( $textarea1.val() ) }catch(e){ console.log(e) }
                                 try{ inputData2 = jQuery.parseJSON( $textarea2.val() ) }catch(e){ console.log(e) }
-                                var outputData  = grpxlib.packWithDefault(inputData1, inputData2)
+                                
 
-                                // show result
-                                $resultwrap.html( visualizeCode(outputData, 'pack') );
-                                // show in console.log
-                                console.log('PACK WITH DEFAULT', '\n in:', inputData1, '\n in:', inputData2, '\n out:', outputData, '\n unpack default:',  grpxlib.unpackToDefault(inputData2), '\n unpack result:', grpxlib.unpack(outputData.obj) );
-                                // show note
-                                if(!$submit.next().length){ $submit.after('<i>результат доступен в <b>console.log</b></i>') }
+                                grpxlib.packWithDefault(inputData1, inputData2).done(function(result){
+                                    // show result
+                                    $resultwrap.html( visualizeCode(result, 'pack') );
+                                    // show in console.log result
+                                    console.log('PACK WITH DEFAULT', '\n in:', inputData1, '\n in:', inputData2, '\n out:', result );
+                                    // show in console.log unpack default
+                                    grpxlib.unpackToDefault(inputData2).done(function(result){
+                                        console.log('unpack default:', result)
+                                    });
+                                    // show in console.log unpack result
+                                    grpxlib.unpack(result.obj).done(function(result){
+                                        console.log('unpack result:', result)
+                                    });
+                                    // show note
+                                    if(!$submit.next().length){ $submit.after('<i>результат доступен в <b>console.log</b></i>') }
+                                });
+
                                 return false;
                             });
                         });
                     </script>
                 </form>
                 <!-- /packWithDefault -->
+
+
+
+
+                <!-- getFullDetales -->
+                <h3><a class="anchor" aria-hidden="true" 
+                    id="getFullDetales-method" 
+                    href="#getFullDetales-method">
+                    getFullDetales
+                </a></h3>
+                <div class="desc">
+                    <div><b>Описание:</b> Получение поных деталей сделанного расчета</div>
+                    <div><b>На вход: 1 параметр</b> 
+                        <ul>
+                            <li>js-объект с опциями
+
+                                <ol>
+                                    <li>year</li>
+                                    <li>mid</li>
+                                    <li>cmid</li>
+                                    <li>agemonths</li>
+                                    <li>grpx</li>
+                                    <li>mileage</li>
+                                    <li>maid</li>
+                                    <li>version</li>
+                                </ol>
+                            </li>
+                        </ul>
+                    </div>
+                    <div><b>Ответ: $.Deferred объект</b> 
+                </div>
+
+                <form id="getFullDetales-form">
+                    <table class="example">
+                        <tr><th>Входные данные</th><th>Результат</th></tr>
+                        <tr><td>
+<textarea rows="20">{
+    "year":"2009",
+    "mid":"1821",
+    "cmid":"6198",
+    "agemonths":"67",
+    "grp0":"100000000000000",
+    "grp1":"200000008000000",
+    "grp2":"4200008004008001",
+    "grp3":"20004111000041",
+    "grp4":"0",
+    "grp5":"0",
+    "grp6":"0",
+    "grp7":"0",
+    "mileage":"73000",
+    "maid":"AvOnTlSd4bxmS_mfIvJpuVqJhmn0YtBe",
+    "version":"1420333135"
+}</textarea>
+
+                        </td><td><div class="output"></div></td></tr>
+                        <tr><td colspan="2"><input value="Получить детали расчета" type="submit"/></td></tr>
+                    </table>
+                    <script>
+                        $(function(){
+                            $('#getFullDetales-form').on('submit', function(){
+                                var $textarea   = $(this).find('textarea');
+                                var $resultwrap = $(this).find('.output');
+                                var $submit     = $(this).find('[type=submit]');
+
+                                var inputData  = '';
+                                try{ inputData = jQuery.parseJSON( $textarea.val() ) }catch(e){ console.log(e) };
+
+                                grpxlib.getFullDetales(inputData).done(function(result){
+                                    // show result
+                                    $resultwrap.html( visualizeCode(result, 'unpackDefault') );
+                                    // show in console.log result
+                                    console.log('GET FULL DETALES', '\n in:', inputData, '\n out:', result );
+                                    // show note
+                                    if(!$submit.next().length){ $submit.after('<i>результат доступен в <b>console.log</b></i>') }
+                                });
+
+                                return false;
+                            });
+                        });
+                    </script>
+                </form>
+                <!-- /getFullDetales -->
+
+
 
 
       </section>
