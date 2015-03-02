@@ -6,6 +6,7 @@ module.exports = (grunt) ->
         package:
             inPath      : 'dev/grpx.js'
             outputPath  : 'build/grpx.min.js'
+            siteLibPath : '../site/javascripts/grpx.min.js'
             name        : 'GRPX lib (https://github.com/tomsoir/grpx)'
             company     : 'Correct Price (http://correctprice.ru/)'
             version     : '0.1.1'
@@ -32,5 +33,22 @@ module.exports = (grunt) ->
 
         grunt.loadNpmTasks('grunt-contrib-uglify')
 
-        grunt.registerTask 'build', ['uglify']
+        grunt.registerTask 'build', ['uglify', 'copyToSite']
+
+        #
+        # tasks
+        #
+        grunt.registerTask 'copyToSite', 'Copy build js files to site', ->
+            path    = require("path")
+            config  = grunt.config.getRaw("package")
+
+            buildPathFile= __dirname+'/'+config.inPath
+            sitePathFile = path.join(__dirname, config.siteLibPath)
+
+            exec = require("child_process").exec
+            exec 'cp '+buildPathFile+' '+sitePathFile, (e) ->
+                grunt.log.error(e) if(e)
+            console.log '>', buildPathFile, sitePathFile
+
+
 
