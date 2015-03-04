@@ -278,8 +278,9 @@
             return state
 
         _prepareResultData: ->
+            galleryPath = if @model.details.gallery? then @model.details.gallery else 'no'
             return {
-                'image': UTILS._getImageSrc('no', @staticHost)
+                'image': UTILS._getImageSrc(galleryPath, @staticHost)
                 'price': UTILS._formatPriceMatrix(@model.price.price, @model.price.selected_condition)
 
                 'date':
@@ -300,6 +301,7 @@
                 'mileage'   : @options.mileage
                 'version'   : @options.version
                 'agemonths' : @options.agemonths
+                'gallery'   : @model.details.gallery
             }
 
 

@@ -323,8 +323,10 @@
     };
 
     Print.prototype._prepareResultData = function() {
+      var galleryPath;
+      galleryPath = this.model.details.gallery != null ? this.model.details.gallery : 'no';
       return {
-        'image': UTILS._getImageSrc('no', this.staticHost),
+        'image': UTILS._getImageSrc(galleryPath, this.staticHost),
         'price': UTILS._formatPriceMatrix(this.model.price.price, this.model.price.selected_condition),
         'date': {
           'yearProduction': this.options.year,
@@ -343,7 +345,8 @@
         },
         'mileage': this.options.mileage,
         'version': this.options.version,
-        'agemonths': this.options.agemonths
+        'agemonths': this.options.agemonths,
+        'gallery': this.model.details.gallery
       };
     };
 
