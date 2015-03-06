@@ -9,7 +9,7 @@
         <link rel="stylesheet" href="stylesheets/pygment_trac.css">
         <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
         <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-        <script type="text/javascript" src="javascripts/grpx.min.js"></script>
+        <script type="text/javascript" src="dev/grpx.js"></script>
         <!--<script type="text/javascript" src="javascripts/dev/grpx.js"></script>-->
         <!--[if lt IE 9]>
         <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -224,6 +224,52 @@
 
 
 
+                <!-- version -->
+                <h3><a class="anchor" aria-hidden="true" 
+                    id="version-method" 
+                    href="#version-method">
+                    version
+                </a></h3>
+                <div class="desc">
+                    <div><b>Описание:</b> Возвращает последную версию данных</div>
+                    <div><b>Нет параметров на вход</b></div>
+                    <div><b>Ответ: String</b> 
+                </div>
+
+                <form id="version-form">
+                    <table class="example">
+                        <tr><th>Входные данные</th><th>Результат</th></tr>
+                        <tr><td>&nbsp;</td><td><div class="output"></div></td></tr>
+                        <tr><td colspan="2"><input value="Запросить последную версию" type="submit"/></td></tr>
+                    </table>
+                    <script>
+                        $(function(){
+                            $('#version-form').on('submit', function(){
+                                var $resultwrap = $(this).find('.output');
+                                var $submit     = $(this).find('[type=submit]');
+
+                                version = grpxlib.version()
+
+                                $resultwrap.html( version );
+                                // show in console.log
+                                console.log('VERSION', '\n out:', version );
+                                // show note
+                                if(!$submit.next().length){ $submit.after('<i>результат доступен в <b>console.log</b></i>') }
+
+                                return false;
+                            });
+                        });
+                    </script>
+                </form>
+                <!-- /version -->
+
+
+
+
+
+
+
+
                 <!-- pack -->
                 <h3><a class="anchor" aria-hidden="true" 
                     id="pack-method" 
@@ -232,9 +278,10 @@
                 </a></h3>
                 <div class="desc">
                     <div><b>Описание:</b> Запаковка данных в GRPX вектор</div>
-                    <div><b>На вход: 1 параметр</b> 
+                    <div><b>На вход: 2 параметр</b> 
                         <ul>
-                            <li>js-объект с данными</li>
+                            <li>(обязательный) js-объект с данными</li>
+                            <li>(не обязательный) версия данных. По-умолчанию берется последняя версия</li>
                         </ul>
                     </div>
                     <div><b>Ответ: $.Deferred - объект</b> 
@@ -250,6 +297,7 @@
     "sbook": "yes",
     "ckeys": "1"
 }</textarea>
+<label>Версия данных: <input type="text" value=""/></label>
                         </td><td><div class="output"></div></td></tr>
                         <tr><td colspan="2"><input value="Запакова данные в вектор" type="submit"/></td></tr>
                     </table>
@@ -260,10 +308,14 @@
                                 var $resultwrap = $(this).find('.output');
                                 var $submit     = $(this).find('[type=submit]');
 
+                                var $input      = $(this).find('[type=text]');
+                                if(!$input.val().length){ $input.val(grpxlib.version()) }
+
                                 var inputData   = ''
                                 try{ inputData  = jQuery.parseJSON( $textarea.val() ) }catch(e){ console.log(e) }
 
-                                grpxlib.pack(inputData).done(function(result){
+                                // '1420333135'
+                                grpxlib.pack(inputData, $input.val()).done(function(result){
                                     // show result
                                     $resultwrap.html( visualizeCode(result, 'pack') );
                                     // show in console.log
@@ -295,7 +347,8 @@
 
                     <div><b>На вход: 1 параметр</b> 
                         <ul>
-                            <li>js-объект с набором GRPX-векторов</li>
+                            <li>(обязательный) js-объект с набором GRPX-векторов</li>
+                            <li>(не обязательный) версия данных. По-умолчанию берется последняя версия</li>
                         </ul>
                     </div>
                     <div><b>Ответ: $.Deferred объект</b> 
@@ -315,6 +368,7 @@
     "grp6":"0",
     "grp7":"0"
 }</textarea>
+<label>Версия данных: <input type="text" value=""/></label>
                         </td><td><div class="output"></div></td></tr>
                         <tr><td colspan="2"><input value="Распакова вектор" type="submit"/></td></tr>
                     </table>
@@ -325,11 +379,14 @@
                                 var $resultwrap = $(this).find('.output');
                                 var $submit     = $(this).find('[type=submit]');
 
+                                var $input      = $(this).find('[type=text]');
+                                if(!$input.val().length){ $input.val(grpxlib.version()) }
+
                                 var inputData   = ''
                                 try{ inputData  = jQuery.parseJSON( $textarea.val() ) }catch(e){ console.log(e) }
 
 
-                                grpxlib.unpack(inputData).done(function(result){
+                                grpxlib.unpack(inputData, $input.val()).done(function(result){
                                     // show result
                                     $resultwrap.html( visualizeCode(result, 'unpack') );
                                     // show in console.log
