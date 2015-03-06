@@ -176,7 +176,6 @@
             'engine_type'               : 'Тип двигателя'
             'privod'                    : 'Привод'
             'transmission'              : 'Коробка передач'
-
     }
 
 
@@ -308,6 +307,7 @@
     class $GRPX
         ready: false
 
+        ver: undefined
         desc: undefined
         sect: undefined
 
@@ -326,10 +326,10 @@
             return false
 
         createRequest: (service, params) ->
-            state = $.Deferred()
-            params= if params then params else ''
+            state   = $.Deferred()
+            params  = if params then params else ''
             $.ajax
-                url: @config.masterApi+'/'+service+'?'+params+'jsoncallback=?'
+                url: @config.masterApi+'/'+service+'?'+params+@_getVersion(params)+'jsoncallback=?'
                 timeout: 3000
                 dataType: "json", 
                 success: (data) =>  
@@ -345,21 +345,49 @@
 
         requiresReady: ->
             @_readyState = $.Deferred()
-            unless @desc or @sect
-                check = => 
-                    if @desc and @sect
-                        @ready = true
-                        @_readyState.resolve()
-                @createRequest('get_opt_desc').done (data)=> @desc = data; check()
-                @createRequest('get_opt_sect').done (data)=> @sect = data; check()
-            else
-                @_readyState.resolve()
+            @_requestVersion().done =>
+                unless @desc or @sect
+                    check = => 
+                        if @desc and @sect
+                            @ready = true
+                            @_readyState.resolve()
+                    @createRequest('get_opt_desc').done (data)=> @desc = data; check()
+                    @createRequest('get_opt_sect').done (data)=> @sect = data; check()
+                else
+                    @_readyState.resolve()
             return @_readyState
+
+        _changeVersionData:(version)->
+            @ver = version
+            @desc= undefined
+            @sect= undefined
+            return @requiresReady()
+
+        _requestVersion: ->
+            state = $.Deferred()
+            unless @ver
+                @createRequest('get_version').done (data)=> 
+                    @ver = data.version
+                    state.resolve()
+            else
+                state.resolve()
+            return state
+
+        _getVersion:(params)->
+            result = ''
+            regexp = new RegExp('version', 'g')
+            if @ver?
+                result = 'version='+@ver+'&'
+                if params? then '&'+result else '?'+result
+            if params?
+                result = '' if regexp.test(params)
+            return result
 
         _onload: (args, fn) ->
             if @_jqueryReady()
                 self = @
                 state= $.Deferred()
+
                 @_readyState.done -> 
                     result = fn.apply(self, args)
                     state.resolve(result)
@@ -367,12 +395,22 @@
             else
                 return { done: -> return false }
 
+        version: -> return @ver
 
+        pack: (oParams, version)->
+            if version?
+                unless version is @ver
+                    result = $.Deferred()
+                    argums = arguments
+                    @_changeVersionData(version).done =>
+                        @_onload(argums, @_pack).done (data)=>
+                            result.resolve(data)
+                else
+                    result = @_onload arguments, @_pack
+            else
+                result = @_onload arguments, @_pack
+            return result
 
-
-
-        pack: (oParams)->
-            return @_onload arguments, @_pack
         _pack: (oParams)->
             opt_desc = @desc
             opt_sect = @sect
@@ -403,8 +441,20 @@
             }
             return oFinalPackData
 
-        unpack: (oGRP)->
-            return @_onload arguments, @_unpack
+        unpack: (oGRP, version)->
+            if version?
+                unless version is @ver
+                    result = $.Deferred()
+                    argums = arguments
+                    @_changeVersionData(version).done =>
+                        @_onload(argums, @_unpack).done (data)=>
+                            result.resolve(data)
+                else
+                    result = @_onload arguments, @_unpack
+            else
+                result = @_onload arguments, @_unpack
+            return result
+
         _unpack: (oGRP)->
             opt_desc = @desc
             opt_sect = @sect

@@ -356,6 +356,8 @@
   $GRPX = (function() {
     $GRPX.prototype.ready = false;
 
+    $GRPX.prototype.ver = void 0;
+
     $GRPX.prototype.desc = void 0;
 
     $GRPX.prototype.sect = void 0;
@@ -385,7 +387,7 @@
       state = $.Deferred();
       params = params ? params : '';
       $.ajax({
-        url: this.config.masterApi + '/' + service + '?' + params + 'jsoncallback=?',
+        url: this.config.masterApi + '/' + service + '?' + params + this._getVersion(params) + 'jsoncallback=?',
         timeout: 3000,
         dataType: "json",
         success: (function(_this) {
@@ -410,33 +412,74 @@
     };
 
     $GRPX.prototype.requiresReady = function() {
-      var check;
       this._readyState = $.Deferred();
-      if (!(this.desc || this.sect)) {
-        check = (function(_this) {
-          return function() {
-            if (_this.desc && _this.sect) {
-              _this.ready = true;
-              return _this._readyState.resolve();
-            }
-          };
-        })(this);
-        this.createRequest('get_opt_desc').done((function(_this) {
+      this._requestVersion().done((function(_this) {
+        return function() {
+          var check;
+          if (!(_this.desc || _this.sect)) {
+            check = function() {
+              if (_this.desc && _this.sect) {
+                _this.ready = true;
+                return _this._readyState.resolve();
+              }
+            };
+            _this.createRequest('get_opt_desc').done(function(data) {
+              _this.desc = data;
+              return check();
+            });
+            return _this.createRequest('get_opt_sect').done(function(data) {
+              _this.sect = data;
+              return check();
+            });
+          } else {
+            return _this._readyState.resolve();
+          }
+        };
+      })(this));
+      return this._readyState;
+    };
+
+    $GRPX.prototype._changeVersionData = function(version) {
+      this.ver = version;
+      this.desc = void 0;
+      this.sect = void 0;
+      return this.requiresReady();
+    };
+
+    $GRPX.prototype._requestVersion = function() {
+      var state;
+      state = $.Deferred();
+      if (!this.ver) {
+        this.createRequest('get_version').done((function(_this) {
           return function(data) {
-            _this.desc = data;
-            return check();
-          };
-        })(this));
-        this.createRequest('get_opt_sect').done((function(_this) {
-          return function(data) {
-            _this.sect = data;
-            return check();
+            _this.ver = data.version;
+            return state.resolve();
           };
         })(this));
       } else {
-        this._readyState.resolve();
+        state.resolve();
       }
-      return this._readyState;
+      return state;
+    };
+
+    $GRPX.prototype._getVersion = function(params) {
+      var regexp, result;
+      result = '';
+      regexp = new RegExp('version', 'g');
+      if (this.ver != null) {
+        result = 'version=' + this.ver + '&';
+        if (params != null) {
+          '&' + result;
+        } else {
+          '?' + result;
+        }
+      }
+      if (params != null) {
+        if (regexp.test(params)) {
+          result = '';
+        }
+      }
+      return result;
     };
 
     $GRPX.prototype._onload = function(args, fn) {
@@ -459,8 +502,30 @@
       }
     };
 
-    $GRPX.prototype.pack = function(oParams) {
-      return this._onload(arguments, this._pack);
+    $GRPX.prototype.version = function() {
+      return this.ver;
+    };
+
+    $GRPX.prototype.pack = function(oParams, version) {
+      var argums, result;
+      if (version != null) {
+        if (version !== this.ver) {
+          result = $.Deferred();
+          argums = arguments;
+          this._changeVersionData(version).done((function(_this) {
+            return function() {
+              return _this._onload(argums, _this._pack).done(function(data) {
+                return result.resolve(data);
+              });
+            };
+          })(this));
+        } else {
+          result = this._onload(arguments, this._pack);
+        }
+      } else {
+        result = this._onload(arguments, this._pack);
+      }
+      return result;
     };
 
     $GRPX.prototype._pack = function(oParams) {
@@ -499,8 +564,26 @@
       return oFinalPackData;
     };
 
-    $GRPX.prototype.unpack = function(oGRP) {
-      return this._onload(arguments, this._unpack);
+    $GRPX.prototype.unpack = function(oGRP, version) {
+      var argums, result;
+      if (version != null) {
+        if (version !== this.ver) {
+          result = $.Deferred();
+          argums = arguments;
+          this._changeVersionData(version).done((function(_this) {
+            return function() {
+              return _this._onload(argums, _this._unpack).done(function(data) {
+                return result.resolve(data);
+              });
+            };
+          })(this));
+        } else {
+          result = this._onload(arguments, this._unpack);
+        }
+      } else {
+        result = this._onload(arguments, this._unpack);
+      }
+      return result;
     };
 
     $GRPX.prototype._unpack = function(oGRP) {
