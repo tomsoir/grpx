@@ -28,30 +28,32 @@
                 otherConditionGroup     : []
             }
             # сначало создаем группы по состояниям
-            for price in priceArr
-                result.groupCondition[price.cond] = {
-                    'way'       : {}
-                    'name'      : price.cond
-                    'title'     : textsModule[price.cond]
-                    'selected'  : if String(selected_condition) is String(price.cond) then true else false
-                }
-            # добавляем типы цены
-            for price in priceArr
-                result.groupCondition[price.cond].way[price.way] = price.price
-            # добавляем только выбранную группу
-            for groupName of result.groupCondition
-                group = result.groupCondition[groupName]
-                result.selectedConditionGroup = group if group.selected
-            # добавляем остальные Не выбранные состояния
-            for groupName of result.groupCondition
-                group = result.groupCondition[groupName]
-                unless group.selected
-                    result.otherConditionGroup.push(group) 
-                    result.otherConditionHeads.push({
-                        name : group.name
-                        title: group.title
-                    })
-
+            if priceArr
+                for price in priceArr
+                    result.groupCondition[price.cond] = {
+                        'way'       : {}
+                        'name'      : price.cond
+                        'title'     : textsModule[price.cond]
+                        'selected'  : if String(selected_condition) is String(price.cond) then true else false
+                    }
+                # добавляем типы цены
+                for price in priceArr
+                    result.groupCondition[price.cond].way[price.way] = price.price
+                # добавляем только выбранную группу
+                for groupName of result.groupCondition
+                    group = result.groupCondition[groupName]
+                    result.selectedConditionGroup = group if group.selected
+                # добавляем остальные Не выбранные состояния
+                for groupName of result.groupCondition
+                    group = result.groupCondition[groupName]
+                    unless group.selected
+                        result.otherConditionGroup.push(group) 
+                        result.otherConditionHeads.push({
+                            name : group.name
+                            title: group.title
+                        })
+            else
+                console.error 'Some minimal options missing'
             return result
 
         _monthText: (number) ->
@@ -180,7 +182,7 @@
 
 
     class Print
-        minimalOptions: ['year','mid','cmid', 'agemonths','grp0','grp1','grp2','grp3','grp4','grp5','grp6','grp7','mileage','version']
+        minimalOptions: ['year','mid','cmid', 'agemonths','grp0','grp1','grp2','grp3','grp4','grp5','grp6','grp7','mileage','version','maid']
 
         model:
             details : undefined
@@ -221,7 +223,7 @@
                     @model.price = data
                     check()
 
-            # получаем матрицу стоимости
+            # получаем бренды
             unless @model.brands
                 @_sendRequest('get_brands').done (data)=> 
                     @model.brands = data
@@ -258,6 +260,7 @@
                         'grp7='+@options.grp7
                         'country=' + if @options.country then @options.country  else 'RU'
                         'province='+ if @options.province then @options.province else '47'
+                        'maid='+@options.maid
                     ]
                     return @GRPX.createRequest('get_calculation', params.join('&')+'&')
 
